@@ -1,2 +1,23 @@
+# Node
 node_modules/
-node_modules/
+
+# GitHub Runner
+actions-runner/
+
+# VS Code
+.vscode/
+
+# Cache
+.cache/
+
+# Build
+dist/
+build/
+
+# .NET
+bin/
+obj/
+.vs/
+
+# Environment
+.env
