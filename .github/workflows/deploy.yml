@@ -1,4 +1,4 @@
-name: CI-CD Pipeline
+name: Docker CI/CD
 
 on:
   push:
@@ -7,33 +7,24 @@ on:
 
 jobs:
   deploy:
-
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
 
     steps:
-
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: Deploy To Ubuntu Server
-        uses: appleboy/ssh-action@v1.0.3
+      - name: Stop Existing Container
+        run: |
+          docker stop webapp || true
+          docker rm webapp || true
 
-        with:
-          host: ${{ secrets.SERVER_HOST }}
-          username: ${{ secrets.SERVER_USER }}
-          key: ${{ secrets.SERVER_SSH_KEY }}
+      - name: Build Docker Image
+        run: |
+          docker build -t simple-webapp .
 
-          script: |
-            cd ~/devops
-
-            git pull origin main
-
-            docker stop webapp || true
-            docker rm webapp || true
-
-            docker build -t simple-webapp .
-
-            docker run -d \
-              --name webapp \
-              -p 3000:3000 \
-              simple-webapp
+      - name: Run Docker Container
+        run: |
+          docker run -d \
+            --name webapp \
+            -p 3000:3000 \
+            simple-webapp
