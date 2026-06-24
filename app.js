@@ -3,7 +3,8 @@ const express = require("express");
 const app = express();
 
 let visitors = 0;
-const version = "v1.0.0";
+const VERSION = "v1.0.0";
+const START_TIME = Date.now();
 
 app.get("/", (req, res) => {
 
@@ -11,281 +12,162 @@ app.get("/", (req, res) => {
 
     res.send(`
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>DevOps Pipeline Dashboard</title>
+<title>DevOps Monitoring Dashboard</title>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
 
 *{
-    margin:0;
-    padding:0;
-    box-sizing:border-box;
-    font-family:Inter,Segoe UI,sans-serif;
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:Inter,Segoe UI,sans-serif;
 }
 
 body{
-
-    min-height:100vh;
-
-    background:linear-gradient(
-        -45deg,
-        #0f172a,
-        #1e1b4b,
-        #312e81,
-        #4c1d95
-    );
-
-    background-size:400% 400%;
-
-    animation:gradientMove 15s ease infinite;
-
-    overflow-x:hidden;
-
-    display:flex;
-    justify-content:center;
-    align-items:center;
-
-    color:white;
+background:#0b1220;
+color:white;
+padding:20px;
 }
 
-@keyframes gradientMove{
-    0%{background-position:0% 50%;}
-    50%{background-position:100% 50%;}
-    100%{background-position:0% 50%;}
+.header{
+display:flex;
+justify-content:space-between;
+align-items:center;
+margin-bottom:25px;
 }
 
-.blob{
-    position:absolute;
-    border-radius:50%;
-    filter:blur(120px);
-    opacity:.6;
+.logo{
+font-size:28px;
+font-weight:bold;
+color:#f97316;
 }
 
-.blob1{
-    width:300px;
-    height:300px;
-    background:#3b82f6;
-    top:-50px;
-    left:-50px;
-}
-
-.blob2{
-    width:300px;
-    height:300px;
-    background:#9333ea;
-    bottom:-50px;
-    right:-50px;
-}
-
-.container{
-    width:90%;
-    max-width:1200px;
-    z-index:10;
-}
-
-.glass{
-
-    background:rgba(255,255,255,0.08);
-
-    backdrop-filter:blur(25px);
-
-    border:1px solid rgba(255,255,255,0.15);
-
-    border-radius:30px;
-
-    padding:40px;
-
-    box-shadow:
-    0 8px 32px rgba(0,0,0,.3);
-}
-
-.hero{
-
-    text-align:center;
-    margin-bottom:40px;
-}
-
-.hero h1{
-
-    font-size:60px;
-    margin-bottom:15px;
-}
-
-.hero p{
-
-    color:#cbd5e1;
-    font-size:20px;
-}
-
-.badge{
-
-    display:inline-block;
-
-    padding:10px 18px;
-
-    border-radius:30px;
-
-    background:rgba(255,255,255,.1);
-
-    margin-bottom:20px;
-
-    color:#93c5fd;
+.clock{
+font-size:18px;
+color:#9ca3af;
 }
 
 .grid{
-
-    display:grid;
-
-    grid-template-columns:
-    repeat(auto-fit,minmax(220px,1fr));
-
-    gap:20px;
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+gap:20px;
+margin-bottom:25px;
 }
 
 .card{
-
-    background:rgba(255,255,255,.06);
-
-    border:1px solid rgba(255,255,255,.1);
-
-    border-radius:20px;
-
-    padding:25px;
-
-    transition:.3s;
+background:#111827;
+border:1px solid #1f2937;
+border-radius:12px;
+padding:20px;
+transition:.3s;
 }
 
 .card:hover{
-
-    transform:translateY(-8px);
-
-    background:rgba(255,255,255,.1);
+transform:translateY(-4px);
+border-color:#374151;
 }
 
 .label{
-
-    color:#94a3b8;
-    margin-bottom:10px;
+font-size:13px;
+color:#9ca3af;
+margin-bottom:10px;
 }
 
 .value{
-
-    font-size:28px;
-    font-weight:700;
+font-size:28px;
+font-weight:bold;
 }
 
 .online{
-    color:#22c55e;
+color:#22c55e;
 }
 
-.clock{
+.warning{
+color:#f59e0b;
+}
 
-    text-align:center;
+.chart-row{
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:20px;
+margin-bottom:25px;
+}
 
-    margin-top:40px;
-
-    font-size:36px;
-
-    font-weight:bold;
+.chart-card{
+background:#111827;
+border:1px solid #1f2937;
+border-radius:12px;
+padding:20px;
+height:350px;
 }
 
 .pipeline{
+background:#111827;
+border:1px solid #1f2937;
+border-radius:12px;
+padding:25px;
+}
 
-    display:flex;
+.pipeline-title{
+font-size:18px;
+margin-bottom:20px;
+}
 
-    justify-content:center;
-
-    gap:20px;
-
-    flex-wrap:wrap;
-
-    margin-top:35px;
+.steps{
+display:flex;
+justify-content:center;
+align-items:center;
+gap:20px;
+flex-wrap:wrap;
 }
 
 .step{
+background:#1f2937;
+padding:12px 20px;
+border-radius:10px;
+border:1px solid #374151;
+}
 
-    padding:12px 18px;
-
-    background:rgba(255,255,255,.08);
-
-    border-radius:15px;
-
-    border:1px solid rgba(255,255,255,.1);
+.arrow{
+font-size:22px;
+color:#22c55e;
 }
 
 .footer{
-
-    margin-top:35px;
-
-    text-align:center;
-
-    color:#94a3b8;
+margin-top:25px;
+text-align:center;
+color:#9ca3af;
 }
 
-.btn{
+@media(max-width:900px){
 
-    display:inline-block;
-
-    margin-top:30px;
-
-    padding:14px 30px;
-
-    background:#6366f1;
-
-    color:white;
-
-    text-decoration:none;
-
-    border-radius:12px;
-
-    transition:.3s;
-}
-
-.btn:hover{
-    background:#4f46e5;
-}
-
-@media(max-width:768px){
-
-.hero h1{
-    font-size:40px;
-}
-
-.clock{
-    font-size:26px;
+.chart-row{
+grid-template-columns:1fr;
 }
 
 }
 
 </style>
-
 </head>
 
 <body>
 
-<div class="blob blob1"></div>
-<div class="blob blob2"></div>
+<div class="header">
 
-<div class="container">
-
-<div class="glass">
-
-<div class="hero">
-
-<div class="badge">
-🚀 DevOps CI/CD Pipeline
+<div class="logo">
+📊 DevOps Monitoring Dashboard
 </div>
 
-<h1>Deploy With Confidence</h1>
-
-<p>
-GitHub • GitHub Actions • Self Hosted Runner • Docker
-</p>
+<div class="clock" id="clock">
+Loading...
+</div>
 
 </div>
 
@@ -298,12 +180,7 @@ GitHub • GitHub Actions • Self Hosted Runner • Docker
 
 <div class="card">
 <div class="label">Build Version</div>
-<div class="value">${version}</div>
-</div>
-
-<div class="card">
-<div class="label">Environment</div>
-<div class="value">DEVELOPMENT</div>
+<div class="value">${VERSION}</div>
 </div>
 
 <div class="card">
@@ -312,7 +189,12 @@ GitHub • GitHub Actions • Self Hosted Runner • Docker
 </div>
 
 <div class="card">
-<div class="label">Container</div>
+<div class="label">Environment</div>
+<div class="value warning">DEV</div>
+</div>
+
+<div class="card">
+<div class="label">Docker Container</div>
 <div class="value online">RUNNING</div>
 </div>
 
@@ -323,45 +205,179 @@ GitHub • GitHub Actions • Self Hosted Runner • Docker
 
 </div>
 
-<div class="clock" id="clock"></div>
+<div class="grid">
+
+<div class="card">
+<div class="label">CPU Usage</div>
+<div class="value" id="cpuValue">38%</div>
+</div>
+
+<div class="card">
+<div class="label">Memory Usage</div>
+<div class="value" id="memoryValue">2.1 GB</div>
+</div>
+
+<div class="card">
+<div class="label">Application Uptime</div>
+<div class="value" id="uptime">0s</div>
+</div>
+
+<div class="card">
+<div class="label">Requests Served</div>
+<div class="value">${visitors}</div>
+</div>
+
+</div>
+
+<div class="chart-row">
+
+<div class="chart-card">
+<canvas id="cpuChart"></canvas>
+</div>
+
+<div class="chart-card">
+<canvas id="memoryChart"></canvas>
+</div>
+
+</div>
 
 <div class="pipeline">
 
+<div class="pipeline-title">
+🚀 CI/CD Pipeline Flow
+</div>
+
+<div class="steps">
+
 <div class="step">GitHub</div>
+
+<div class="arrow">➜</div>
+
 <div class="step">GitHub Actions</div>
-<div class="step">Runner</div>
+
+<div class="arrow">➜</div>
+
+<div class="step">Self Hosted Runner</div>
+
+<div class="arrow">➜</div>
+
 <div class="step">Docker</div>
-<div class="step">Live App</div>
+
+<div class="arrow">➜</div>
+
+<div class="step">Live Application</div>
 
 </div>
 
-<div style="text-align:center;">
-<a href="/" class="btn">
-Refresh Dashboard
-</a>
 </div>
 
 <div class="footer">
-Built with Node.js, Docker & GitHub Actions
-</div>
-
-</div>
-
+Grafana Inspired Dashboard | Node.js | Docker | GitHub Actions
 </div>
 
 <script>
 
 function updateClock(){
 
-document.getElementById("clock")
-.innerHTML =
-new Date().toLocaleTimeString();
+document.getElementById("clock").innerHTML =
+new Date().toLocaleString();
 
 }
 
 setInterval(updateClock,1000);
-
 updateClock();
+
+const startTime = ${START_TIME};
+
+function updateUptime(){
+
+const seconds =
+Math.floor((Date.now() - startTime)/1000);
+
+document.getElementById("uptime").innerHTML =
+seconds + "s";
+
+}
+
+setInterval(updateUptime,1000);
+
+const cpuCtx =
+document.getElementById('cpuChart');
+
+const cpuData =
+[20,35,28,40,38,45,42];
+
+const cpuChart =
+new Chart(cpuCtx,{
+type:'line',
+data:{
+labels:['1','2','3','4','5','6','7'],
+datasets:[{
+label:'CPU Usage (%)',
+data:cpuData,
+borderColor:'#22c55e',
+backgroundColor:'rgba(34,197,94,0.2)',
+fill:true,
+tension:0.4
+}]
+},
+options:{
+responsive:true,
+maintainAspectRatio:false
+}
+});
+
+const memoryCtx =
+document.getElementById('memoryChart');
+
+const memoryData =
+[1.8,2.0,2.2,2.4,2.1,2.3,2.5];
+
+const memoryChart =
+new Chart(memoryCtx,{
+type:'line',
+data:{
+labels:['1','2','3','4','5','6','7'],
+datasets:[{
+label:'Memory Usage (GB)',
+data:memoryData,
+borderColor:'#f97316',
+backgroundColor:'rgba(249,115,22,0.2)',
+fill:true,
+tension:0.4
+}]
+},
+options:{
+responsive:true,
+maintainAspectRatio:false
+}
+});
+
+setInterval(()=>{
+
+let cpu =
+Math.floor(Math.random()*40)+20;
+
+document.getElementById("cpuValue")
+.innerHTML = cpu + "%";
+
+cpuData.push(cpu);
+cpuData.shift();
+
+cpuChart.update();
+
+let mem =
+(1.5 + Math.random()*2).toFixed(1);
+
+document.getElementById("memoryValue")
+.innerHTML = mem + " GB";
+
+memoryData.push(mem);
+memoryData.shift();
+
+memoryChart.update();
+
+},3000);
 
 </script>
 
@@ -371,5 +387,5 @@ updateClock();
 });
 
 app.listen(3000, () => {
-    console.log("🚀 Server running on port 3000");
+    console.log("🚀 Dashboard running on port 3000");
 });
