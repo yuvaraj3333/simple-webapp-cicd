@@ -162,7 +162,7 @@ grid-template-columns:1fr;
 <div class="header">
 
 <div class="logo">
-📊 DevOps Monitoring Dashboard
+📊 DevOps Monitoring
 </div>
 
 <div class="clock" id="clock">
