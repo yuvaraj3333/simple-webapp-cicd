@@ -17,7 +17,7 @@ app.get("/", (req, res) => {
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>DevOps Monitoring Dashboard</title>
+<title>DevOps Monitoring Dashboard View</title>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
